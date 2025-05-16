@@ -3,12 +3,20 @@ import { Hono } from 'hono';
 import { auth } from '../middleware/auth';
 import { z } from 'zod'; // Agrega Zod para validación
 
-const app = new Hono();
 
-function getUserFromContext(c: any): { username: string } {
-  // @ts-ignore
-  return c.var.user || c.user || (c.get ? c.get('user') : undefined);
-}
+type UserContext = {
+  Variables: {
+    user: { username: string }
+  }
+};
+
+const app = new Hono<UserContext>();
+
+// function getUserFromContext(c: any): { username: string } {
+//   // @ts-ignore
+//   return c.var.user || c.user || (c.get ? c.get('user') : undefined);
+// }
+
 
 
 
@@ -25,7 +33,8 @@ app.post('/submit', auth, async (c) => {
     return c.json({ error: 'Game and numeric score required', details: parse.error.errors }, 400);
   }
   const { game, score } = parse.data;
-  const user = getUserFromContext(c);
+  const user = c.get('user');
+  //getUserFromContext(c);
   if (!user || !user.username) return c.json({ error: 'User not found in context' }, 401);
   const username = user.username;
   const leaderboardKey = `leaderboard:${game}`;
