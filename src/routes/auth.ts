@@ -1,8 +1,13 @@
 import {   JWT_SECRET } from '../index';
-import app from '../index';
+
 // import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken'
+// import jwt from 'jsonwebtoken'
 import{ redis} from '../db/client';
+import { Hono} from 'hono';
+import {sign} from "hono/jwt";
+
+
+const app = new Hono();
 
 app.post('/register', async (c) => {
   const { username, password } = await c.req.json();
@@ -37,19 +42,16 @@ app.post('/login', async (c) => {
   if (!valid) {
     return c.json({ error: 'Invalid credentials' }, 401);
   }
-  const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1d' });
+  const token =  await sign({ 
+    username,
+    //1d expires in 1 day
+    //exp: Date.now() + 86400
+    exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24)
+    //exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24
+
+     //exp: Date.now() + 86400 
+    }, JWT_SECRET);
   return c.json({ token });
 });
 
-export const auth = async (c: any, next: any) => {
-  const authHeader = c.req.header('authorization');
-  if (!authHeader) return c.json({ error: 'No token' }, 401);
-  const token = authHeader.replace('Bearer ', '');
-  try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    c.set('user', payload);
-    await next();
-  } catch {
-    return c.json({ error: 'Invalid token' }, 401);
-  }
-};
+export default app;

@@ -1,6 +1,6 @@
 import {  redis } from '../db/client';
 import { Hono } from 'hono';
-import { auth } from './auth';
+import { auth } from '../middleware/auth';
 
 const app = new Hono();
 
