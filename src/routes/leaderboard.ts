@@ -1,6 +1,7 @@
-import {  redis } from '../db/client';
+import { redis } from '../db/client';
 import { Hono } from 'hono';
 import { auth } from '../middleware/auth';
+import { z } from 'zod'; // Agrega Zod para validación
 
 const app = new Hono();
 
@@ -9,11 +10,21 @@ function getUserFromContext(c: any): { username: string } {
   return c.var.user || c.user || (c.get ? c.get('user') : undefined);
 }
 
+
+
+// Esquema de validación para submit
+const submitSchema = z.object({
+  game: z.string().min(1),
+  score: z.number(),
+});
+
 app.post('/submit', auth, async (c) => {
-  const { game, score } = await c.req.json();
-  if (!game || typeof score !== 'number') {
-    return c.json({ error: 'Game and numeric score required' }, 400);
+  const body = await c.req.json();
+  const parse = submitSchema.safeParse(body);
+  if (!parse.success) {
+    return c.json({ error: 'Game and numeric score required', details: parse.error.errors }, 400);
   }
+  const { game, score } = parse.data;
   const user = getUserFromContext(c);
   if (!user || !user.username) return c.json({ error: 'User not found in context' }, 401);
   const username = user.username;
@@ -61,6 +72,5 @@ app.get('/top/:game/:from/:to', async (c) => {
   }
   return c.json(result);
 });
-
 
 export default app;
