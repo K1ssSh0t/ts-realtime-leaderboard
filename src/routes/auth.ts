@@ -5,8 +5,15 @@ import { JWT_SECRET } from "../index";
 import { redis } from "../db/client";
 import { Hono } from "hono";
 import { sign } from "hono/jwt";
+import { z } from "zod";
 
 const app = new Hono();
+
+// Esquema de validación para el registro
+const registerSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(6),
+});
 
 app.post("/register", async (c) => {
   const { username, password } = await c.req.json();
@@ -25,6 +32,12 @@ app.post("/register", async (c) => {
   //bcrypt.hash(password, 10);
   await redis.set(userKey, JSON.stringify({ username, password: hashed }));
   return c.json({ message: "User registered" });
+});
+
+// Esquema de validación para el login
+const loginSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(6),
 });
 
 app.post("/login", async (c) => {

@@ -47,7 +47,7 @@ app.post("/submit", auth, async (c) => {
   return c.json({ message: "Score submitted" });
 });
 
-app.get("/leaderboard/:game", async (c) => {
+app.get("/:game", async (c) => {
   const game = c.req.param("game");
   const top = Number(c.req.query("top") || 10);
   const leaderboardKey = `leaderboard:${game}`;

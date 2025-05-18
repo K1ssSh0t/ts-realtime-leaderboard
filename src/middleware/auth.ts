@@ -14,8 +14,8 @@ export const auth: MiddlewareHandler = async (c, next) => {
   }
   try {
     const payload = await verify(token, JWT_SECRET) as unknown as {
-      userId: number;
-      role: string;
+      username: string;
+      exp: number;
     };
     c.set("user", payload);
     await next();
