@@ -2,6 +2,12 @@ import { JWT_SECRET } from "../index";
 import { verify } from "hono/jwt";
 import { type MiddlewareHandler } from "hono";
 
+/**
+ * @description Authentication middleware.
+ * @param c Hono context
+ * @param next Next middleware
+ * @returns Promise<Response>
+ */
 export const auth: MiddlewareHandler = async (c, next) => {
   const authHeader = c.req.header("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {

@@ -10,6 +10,11 @@ const app = new Hono();
 
 app.use(logger());
 app.use(prettyJSON());
+/**
+ * @description Root route.
+ * @route GET /
+ * @access Public
+ */
 app.get("/", (c) => c.text("Leaderboard API is running!"));
 app.route("/auth", auth);
 app.route("/leaderboard", leaderboard);

@@ -11,17 +11,17 @@ type UserContext = {
 
 const app = new Hono<UserContext>();
 
-// function getUserFromContext(c: any): { username: string } {
-//   // @ts-ignore
-//   return c.var.user || c.user || (c.get ? c.get('user') : undefined);
-// }
-
 // Esquema de validación para submit
 const submitSchema = z.object({
   game: z.string().min(1),
   score: z.number(),
 });
 
+/**
+ * @description Submit a score for a game.
+ * @route POST /leaderboard/submit
+ * @access Private
+ */
 app.post("/submit", auth, async (c) => {
   const body = await c.req.json();
   const parse = submitSchema.safeParse(body);
@@ -33,7 +33,6 @@ app.post("/submit", auth, async (c) => {
   }
   const { game, score } = parse.data;
   const user = c.get("user");
-  //getUserFromContext(c);
   if (!user || !user.username) {
     return c.json({ error: "User not found in context" }, 401);
   }
@@ -47,6 +46,11 @@ app.post("/submit", auth, async (c) => {
   return c.json({ message: "Score submitted" });
 });
 
+/**
+ * @description Get the leaderboard for a game.
+ * @route GET /leaderboard/:game
+ * @access Public
+ */
 app.get("/:game", async (c) => {
   const game = c.req.param("game");
   const top = Number(c.req.query("top") || 10);
@@ -59,6 +63,11 @@ app.get("/:game", async (c) => {
   return c.json(result);
 });
 
+/**
+ * @description Get the rank of a user in a game.
+ * @route GET /leaderboard/rank/:game/:username
+ * @access Public
+ */
 app.get("/rank/:game/:username", async (c) => {
   const { game, username } = c.req.param();
   const leaderboardKey = `leaderboard:${game}`;
@@ -68,6 +77,11 @@ app.get("/rank/:game/:username", async (c) => {
   return c.json({ username, rank: rank + 1, score: Number(score) });
 });
 
+/**
+ * @description Get the top users for a game within a date range.
+ * @route GET /leaderboard/top/:game/:from/:to
+ * @access Public
+ */
 app.get("/top/:game/:from/:to", async (c) => {
   const { game, from, to } = c.req.param();
   const leaderboardKey = `leaderboard:${game}`;

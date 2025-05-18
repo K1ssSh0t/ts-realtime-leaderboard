@@ -15,6 +15,11 @@ const registerSchema = z.object({
   password: z.string().min(6),
 });
 
+/**
+ * @description Register a new user.
+ * @route POST /auth/register
+ * @access Public
+ */
 app.post("/register", async (c) => {
   const { username, password } = await c.req.json();
   if (!username || !password) {
@@ -40,6 +45,11 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
+/**
+ * @description Login a user.
+ * @route POST /auth/login
+ * @access Public
+ */
 app.post("/login", async (c) => {
   const { username, password } = await c.req.json();
   const userKey = `user:${username}`;
